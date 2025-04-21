@@ -1,0 +1,2 @@
+# MyPowerDash
+Electricity Consumption Insights
