@@ -1,15 +1,12 @@
-# MyPowerDash – Refactored with Tabs
 import streamlit as st
 import pandas as pd
 import io
 import csv
 import numpy as np
 import plotly.express as px
-import plotly.graph_objects as go
 import requests
 from bs4 import BeautifulSoup
 import re
-
 
 st.set_page_config(
     page_title="⚡ MyPowerDash",
@@ -41,14 +38,12 @@ st.markdown(
 st.markdown(
     """
     <style>
-    /* Bold, larger font for tab labels */
     [data-baseweb="tab-list"] > div > button {
         font-size: 1.5rem !important;
         font-weight: bold !important;
         padding: 0.75rem 1.5rem !important;
     }
 
-    /* Bigger emoji icons inside tabs */
     [data-baseweb="tab-list"] > div > button span {
         font-size: 2rem !important;
         margin-right: 0.5rem !important;
@@ -74,7 +69,6 @@ st.markdown(
 st.markdown(
     """
     <style>
-    /* Center all subheaders + make them bigger */
     .block-container h3 {
         text-align: center;
         font-size: 1.8rem !important;
@@ -88,14 +82,9 @@ st.markdown(
 # Page setup
 st.title("⚡ MyPowerDash – Electricity Consumption Insights")
 
-
-
-
 # Step 1: Upload file
 uploaded_file = st.file_uploader("Upload your electricity usage CSV file", type=["csv"])
 st.caption("🔒 Your file is processed locally and not stored on our servers. No personal data is saved.")
-
-
 
 if uploaded_file is not None:
     # Step 2: Read file content and extract metadata
@@ -154,8 +143,7 @@ if uploaded_file is not None:
             col3.metric("Meter Code", meter_code)
             col4.metric("Meter Number", meter_number)
 
-            #st.subheader("Raw Data Preview")
-            #st.dataframe(df.head(96), height=300)
+            st.markdown("---")
 
             st.subheader("Consumption Summary")
             col1, col2, col3 = st.columns(3)
@@ -163,12 +151,16 @@ if uploaded_file is not None:
             col2.metric("Avg Monthly (kWh)", f"{df.resample('M', on='Datetime')['kWh'].sum().mean():,.0f}")
             col3.metric("Avg Daily (kWh)", f"{df.resample('D', on='Datetime')['kWh'].sum().mean():,.1f}")
 
+            st.markdown("---")
+
             st.subheader("Monthly Consumption")
             monthly = df.resample('M', on='Datetime')['kWh'].sum().reset_index()
             monthly['Month'] = monthly['Datetime'].dt.strftime('%b %Y')
             fig_month = px.line(monthly, x='Month', y='kWh', markers=True)
             fig_month.update_layout(title='Monthly Electricity Consumption', xaxis_tickangle=-45)
             st.plotly_chart(fig_month, use_container_width=True, key="plot_monthly_line")
+
+            st.markdown("---")
 
             st.subheader("Weekday Consumption")
             weekdays_order = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -211,12 +203,13 @@ if uploaded_file is not None:
 
         if summer_avg > overall_avg * 1.2:
             st.write(
-                "Tip: Summer usage is significantly higher. Clean your AC filters and avoid setting very low temperatures.")
+                "Tip: Summer usage is significantly higher. Clean your AC filters and avoid setting it on very low temperatures.")
 
         if winter_avg > overall_avg * 1.2:
             st.write(
                 "Tip: Winter usage is high. Consider using gas or solar heating and reduce electric heater use. Heat water during off-peak times if using electric boilers.")
 
+        st.markdown("---")
         with st.container():
             st.subheader("Heatmap: Weekday × Month")
             heat_df = df.copy()
@@ -298,6 +291,7 @@ if uploaded_file is not None:
             except:
                 rate = 0.6402
 
+
             col_spacer_left, col_center, col_spacer_right = st.columns([1, 2, 1])
 
             with col_center:
@@ -311,6 +305,8 @@ if uploaded_file is not None:
                 st.caption(
                     "Default tariff based on the current IEC residential rate (including VAT). You can adjust it manually."
                 )
+
+            st.markdown("---")
 
             # Monthly cost calculation
             monthly_costs = df.resample('M', on='Datetime')['kWh'].sum().reset_index()
@@ -341,6 +337,8 @@ if uploaded_file is not None:
                 "Note: The cost calculation does not include the fixed distribution and supply charges, "
                 "which may add ~₪30/month depending on your connection type."
             )
+
+            st.markdown("---")
 
             st.markdown(
                 """
